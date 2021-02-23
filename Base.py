@@ -1,6 +1,12 @@
 import arcade
+from Partikel import Partikel
+from Spring import Spring
+from Vektor import Vektor
 
 class Base(arcade.Window):
+
+    gravity = Vektor(0, -9.89)
+    doUpdate = True
 
     def __init__(self, width, height):
         super().__init__()
@@ -9,38 +15,46 @@ class Base(arcade.Window):
     def setup(self):
         arcade.set_background_color(arcade.color.PURPLE_NAVY)
 
-        self.k = 0.01
-        self.length = 100
-        self.velocity = 0.0
+        k = 0.01
+        length = 200
 
-        self.ball = [arcade.get_window().get_size()[0]//2, arcade.get_window().get_size()[1]//2]
-        self.ball_radius = 30
+        self.ball = Partikel(Vektor(arcade.get_window().get_size()[0]//2, arcade.get_window().get_size()[1]//2), 30)
 
-        self.anker = (arcade.get_window().get_size()[0]//2, self.ball[1]+self.length)
+        self.anker = Partikel(Vektor(arcade.get_window().get_size()[0]//2, self.ball.vec.y + length), 10)
 
-        self.gravity = (0, -10)
+        self.spring = Spring(self.anker, self.ball, k, length)
+        
 
 
 
     def on_draw(self):
         arcade.start_render()
-        arcade.draw_line(self.anker[0], self.anker[1], self.ball[0], self.ball[1], arcade.color.WHITE_SMOKE)
-        arcade.draw_circle_filled(self.ball[0], self.ball[1], self.ball_radius, arcade.color.BLEU_DE_FRANCE)
+
+        self.spring.draw()
+        self.ball.draw()
+        self.anker.draw()
 
     
     def on_update(self, delta_time):
+        if Base.doUpdate:
+            self.spring.update()
+            self.ball.vec = Vektor.add(self.ball.vec, Base.gravity)
         
-        x = (self.anker[1] - self.ball[1]) - self.length
-        force_spring = self.k * x
+        
+    def on_mouse_press(self, x, y, b, m):
+        self.ball.vec.x = x
+        self.ball.vec.y = y
+        Base.doUpdate = False
 
-        self.ball[1] += force_spring
 
-        self.velocity += force_spring
-        self.ball[1] += self.velocity
-
+    def on_mouse_release(self, x, y, b, m):
+        Base.doUpdate = True
 
     def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
-        self.ball[1] = y
+        self.ball.vec.x = x
+        self.ball.vec.y = y
+
+
 
 b = Base(400, 800)
 b.setup()
