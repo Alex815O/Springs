@@ -27,9 +27,18 @@ class Spring():
         force = self.spring_vec.normalise().mult_value(-self.k * x)
 
         self.velocity = Vektor.add(self.velocity, force)
-        self.pb.vec = Vektor.add(self.pb.vec, self.velocity)
 
-        self.velocity = self.velocity.mult_value(0.99)
+        # for Ball A
+        if not self.pa.anker:
+            self.pa.vec = Vektor.add(self.pa.vec, self.velocity.mult_value(-1))
+
+        # for Ball B
+        if not self.pb.anker:
+            self.pb.vec = Vektor.add(self.pb.vec, self.velocity)
+
+        self.velocity = self.velocity.mult_value(0.98)
+
+
 
         
 
